@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "noboom"
+version = "0.1.0"
+description = "NoBOOM: A collection of datasets from chemical plants"
+readme = "README.md"
+requires-python = ">=3.9"
+
+authors = [
+    { name = "Dennis Wagner", email = "wagnerd@rptu.de" },
+    { name = "Denys Senkin", email = "dsenkin@rhrk.uni-kl.de" },
+]
+
+# Add your runtime dependencies here, or leave empty if none
+dependencies = [
+    "numpy>=1.24",
+    "pandas>=2.0",
+    "torch>=2.3"
+]
+
+# Optional classifiers (can delete if you do not care)
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+]
+
+[project.urls]
+Homepage = "https://github.com/denix56/noboom"
+Repository = "https://github.com/denix56/noboom"
+
+[tool.setuptools]
+# We are using a src/ layout: packages live under src/
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
