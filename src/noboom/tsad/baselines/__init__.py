@@ -1,1 +1,1 @@
-from .moving_mean_difference import MovingMeanDifferenceAnomalyDetector
+from .torch_moving_mean_difference import MovingMeanDifferenceAnomalyDetector
