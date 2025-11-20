@@ -17,7 +17,6 @@ authors = [
 # Add your runtime dependencies here, or leave empty if none
 dependencies = [
     "numpy>=1.24",
-    "pandas>=2.0",
     "torch>=2.3"
 ]
 
