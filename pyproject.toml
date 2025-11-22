@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=61", "wheel"]
+requires = ["setuptools>=61"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -17,6 +17,7 @@ authors = [
 # Add your runtime dependencies here, or leave empty if none
 dependencies = [
     "numpy>=1.24",
+    "pandas>=2.3",
     "torch>=2.3"
 ]
 
@@ -30,10 +31,3 @@ classifiers = [
 [project.urls]
 Homepage = "https://github.com/denix56/noboom"
 Repository = "https://github.com/denix56/noboom"
-
-[tool.setuptools]
-# We are using a src/ layout: packages live under src/
-package-dir = { "" = "src" }
-
-[tool.setuptools.packages.find]
-where = ["src"]
