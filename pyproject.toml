@@ -31,3 +31,6 @@ classifiers = [
 [project.urls]
 Homepage = "https://github.com/denix56/noboom"
 Repository = "https://github.com/denix56/noboom"
+
+[tool.hatch.build.targets.wheel]
+packages = ["noboom"]
