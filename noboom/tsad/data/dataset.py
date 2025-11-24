@@ -59,24 +59,6 @@ class Dataset:
         self._samples.append(time_series.to_numpy())
         self._targets.append(targets)
 
-    def _fast_load(self, prefix: str):
-        time_series = pd.read_parquet(os.path.join(self.root, prefix + '_timeseries.parquet'))
-        self._process_ts(time_series)
-
-    def _slow_load(self, prefix: str):
-        ts_list = []
-        for (operating_point, _, runs) in os.walk(self.root):
-            for run in runs:
-                if prefix in run and run.endswith('.csv'):
-                    time_series = pd.read_csv(os.path.join(operating_point, run))
-                    if self.fast_load:
-                        ts_list.append(time_series.copy())
-                    self._process_ts(time_series)
-                    del time_series
-        if self.fast_load:
-            ts_list = pd.concat(ts_list, ignore_index=True)
-            ts_list.to_parquet(os.path.join(self.root, prefix + '_timeseries.parquet'))
-
     def load(self):
         if self.train:
             if self.train_anomalies:
@@ -86,13 +68,18 @@ class Dataset:
         else:
             prefix = 'test'
 
-        if self.fast_load:
-            try:
-                self._fast_load(prefix)
-            except FileNotFoundError:
-                self._slow_load(prefix)
-        else:
-            self._slow_load(prefix)
+        for (operating_point, _, runs) in os.walk(self.root):
+            for run in runs:
+                if prefix in run and run.endswith('.csv'):
+                    try:
+                        time_series = pd.read_parquet(
+                            os.path.join(operating_point, os.path.splitext(run)[0] + '.parquet'))
+                    except FileNotFoundError:
+                        time_series = pd.read_csv(os.path.join(operating_point, run))
+                        if self.fast_load:
+                            time_series.to_parquet(os.path.join(operating_point, os.path.splitext(run)[0] + '.parquet'))
+                    self._process_ts(time_series)
+                    del time_series
 
     def __getitem__(self, item) -> tuple[np.ndarray, np.ndarray]:
         return self._samples[item], self._targets[item]
