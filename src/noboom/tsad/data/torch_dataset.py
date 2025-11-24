@@ -18,10 +18,10 @@ class TorchDataset(Dataset, torch.utils.data.Dataset):
 
     def __init__(self, dataset_name: str, version: str, root: str, train: bool = True,
                  binary_labels: bool = False, download: bool = False, train_anomalies: bool = False,
-                 include_misc_faults: bool = False, include_controller_faults: bool = False):
+                 include_misc_faults: bool = False, include_controller_faults: bool = False, fast_load: bool = False):
 
         Dataset.__init__(self, dataset_name, version, root, train, binary_labels, download, train_anomalies,
-                         include_misc_faults, include_controller_faults)
+                         include_misc_faults, include_controller_faults, fast_load)
         torch.utils.data.Dataset.__init__(self)
 
     def __getitem__(self, item: int) -> tuple[tuple[torch.Tensor], tuple[torch.Tensor]]:
