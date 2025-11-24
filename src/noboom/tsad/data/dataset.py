@@ -15,11 +15,12 @@ class Dataset:
     :param train_anomalies: If set, include anomalies in the training set.
     :param include_misc_faults: If set, include miscellaneous faults as anomalies.
     :param include_controller_faults:  If set, include controller faults as anomalies.
+    :param fast_load: Save timeseries as .parquet for faster loading.
     """
 
     def __init__(self, dataset: str, version: str, root: str, train: bool = True,
                  binary_labels: bool = False, download: bool = False, train_anomalies: bool = False,
-                 include_misc_faults: bool = False, include_controller_faults: bool = False):
+                 include_misc_faults: bool = False, include_controller_faults: bool = False, fast_load: bool = False):
 
         self.name = dataset
         self.version = version
@@ -29,6 +30,7 @@ class Dataset:
         self.train_anomalies = train_anomalies
         self.include_misc_faults = include_misc_faults
         self.include_controller_faults = include_controller_faults
+        self.fast_load =fast_load
 
         self._features: list[str] = []
         self._samples = []
@@ -36,8 +38,46 @@ class Dataset:
 
         self.load()
 
-    def load(self):
+    def _process_ts(self, time_series: pd.DataFrame):
+        if self.include_misc_faults and self.label_misc_feature is not None:
+            mask = (time_series[self.label_misc_feature] > 0) & (time_series[self.label_feature] == 0)
+            time_series.loc[mask, self.label_feature] = time_series.loc[mask, self.label_misc_feature]
 
+        if self.include_controller_faults and self.label_controller_feature is not None:
+            mask = (time_series[self.label_controller_feature] > 0) & (time_series[self.label_feature] == 0)
+            time_series.loc[mask, self.label_feature] = time_series.loc[mask, self.label_controller_feature]
+
+        if self.binary_labels:
+            targets = (time_series[self.label_feature].to_numpy() > 0).astype(int)
+        else:
+            targets = time_series[self.label_feature].to_numpy()
+
+        time_series.drop(self.meta_data, axis=1, inplace=True)
+
+        time_series = time_series.astype(np.float32)
+
+        self._samples.append(time_series.to_numpy())
+        self._targets.append(targets)
+
+    def _fast_load(self, prefix: str):
+        time_series = pd.read_parquet(os.path.join(self.root, prefix + '_timeseries.parquet'))
+        self._process_ts(time_series)
+
+    def _slow_load(self, prefix: str):
+        ts_list = []
+        for (operating_point, _, runs) in os.walk(self.root):
+            for run in runs:
+                if prefix in run and run.endswith('.csv'):
+                    time_series = pd.read_csv(os.path.join(operating_point, run))
+                    if self.fast_load:
+                        ts_list.append(time_series)
+                    self._process_ts(time_series)
+                    del time_series
+        if self.fast_load:
+            ts_list = pd.concat(ts_list, ignore_index=True)
+            ts_list.to_parquet(os.path.join(self.root, prefix + '_timeseries.parquet'))
+
+    def load(self):
         if self.train:
             if self.train_anomalies:
                 prefix = 'train'
@@ -46,36 +86,13 @@ class Dataset:
         else:
             prefix = 'test'
 
-        for (operating_point, _, runs) in os.walk(self.root):
-
-            for run in runs:
-                if prefix in run and run.endswith('.csv'):
-
-                    time_series = pd.read_csv(os.path.join(operating_point, run))
-
-                    if self.include_misc_faults and self.label_misc_feature is not None:
-
-                        mask = (time_series[self.label_misc_feature] > 0) & (time_series[self.label_feature] == 0)
-                        time_series.loc[mask, self.label_feature] = time_series.loc[mask, self.label_misc_feature]
-
-                    if self.include_controller_faults and self.label_controller_feature is not None:
-
-                        mask = (time_series[self.label_controller_feature] > 0) & (time_series[self.label_feature] == 0)
-                        time_series.loc[mask, self.label_feature] = time_series.loc[mask, self.label_controller_feature]
-
-                    if self.binary_labels:
-                        targets = (time_series[self.label_feature].to_numpy() > 0).astype(int)
-                    else:
-                        targets = time_series[self.label_feature].to_numpy()
-
-                    time_series.drop(self.meta_data, axis=1, inplace=True)
-
-                    time_series = time_series.astype(np.float32)
-
-                    self._samples.append(time_series.to_numpy())
-                    self._targets.append(targets)
-
-                    del time_series
+        if self.fast_load:
+            try:
+                self._fast_load(prefix)
+            except FileNotFoundError:
+                self._slow_load(prefix)
+        else:
+            self._slow_load(prefix)
 
     def __getitem__(self, item) -> tuple[np.ndarray, np.ndarray]:
         return self._samples[item], self._targets[item]
