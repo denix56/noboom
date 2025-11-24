@@ -50,7 +50,7 @@ class Dataset:
         if self.binary_labels:
             targets = (time_series[self.label_feature].to_numpy() > 0).astype(int)
         else:
-            targets = time_series[self.label_feature].to_numpy()
+            targets = time_series[self.label_feature].to_numpy().astype(int)
 
         time_series.drop(self.meta_data, axis=1, inplace=True)
 
@@ -70,7 +70,7 @@ class Dataset:
                 if prefix in run and run.endswith('.csv'):
                     time_series = pd.read_csv(os.path.join(operating_point, run))
                     if self.fast_load:
-                        ts_list.append(time_series)
+                        ts_list.append(time_series.copy())
                     self._process_ts(time_series)
                     del time_series
         if self.fast_load:
