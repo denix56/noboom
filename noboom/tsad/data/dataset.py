@@ -30,7 +30,7 @@ class Dataset:
         self.train_anomalies = train_anomalies
         self.include_misc_faults = include_misc_faults
         self.include_controller_faults = include_controller_faults
-        self.fast_load =fast_load
+        self.fast_load = fast_load
 
         self._features: list[str] = []
         self._samples = []
