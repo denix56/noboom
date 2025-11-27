@@ -1,4 +1,4 @@
-import os
+from pathlib import Path
 import numpy as np
 import pandas as pd
 
@@ -68,18 +68,23 @@ class Dataset:
         else:
             prefix = 'test'
 
-        for (operating_point, _, runs) in os.walk(self.root):
-            for run in runs:
-                if prefix in run and run.endswith('.csv'):
-                    try:
-                        time_series = pd.read_parquet(
-                            os.path.join(operating_point, os.path.splitext(run)[0] + '.parquet'))
-                    except FileNotFoundError:
-                        time_series = pd.read_csv(os.path.join(operating_point, run))
-                        if self.fast_load:
-                            time_series.to_parquet(os.path.join(operating_point, os.path.splitext(run)[0] + '.parquet'))
-                    self._process_ts(time_series)
-                    del time_series
+        root_path = Path(self.root)
+        dataset_files = sorted(
+            path for path in root_path.rglob('*.csv') if prefix in path.name
+        )
+
+        for csv_path in dataset_files:
+            parquet_path = csv_path.with_suffix('.parquet')
+
+            try:
+                time_series = pd.read_parquet(parquet_path)
+            except FileNotFoundError:
+                time_series = pd.read_csv(csv_path)
+                if self.fast_load:
+                    time_series.to_parquet(parquet_path)
+
+            self._process_ts(time_series)
+            del time_series
 
     def __getitem__(self, item) -> tuple[np.ndarray, np.ndarray]:
         return self._samples[item], self._targets[item]
