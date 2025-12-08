@@ -57,7 +57,6 @@ class Dataset:
         time_series = time_series.astype(np.float32)
 
         self._samples.append(time_series.to_numpy())
-        print(targets.shape)
         self._targets.append(targets)
 
     def load(self):
