@@ -1,6 +1,7 @@
 from pathlib import Path
 import numpy as np
 import pandas as pd
+import os
 
 
 class Dataset:
@@ -20,7 +21,8 @@ class Dataset:
 
     def __init__(self, dataset: str, version: str, root: str, train: bool = True,
                  binary_labels: bool = False, download: bool = False, train_anomalies: bool = False,
-                 include_misc_faults: bool = False, include_controller_faults: bool = False, fast_load: bool = False):
+                 include_misc_faults: bool = False, include_controller_faults: bool = False,
+                 fast_load: bool = False, cv_thresh: float = 1e-3):
 
         self.name = dataset
         self.version = version
@@ -31,6 +33,7 @@ class Dataset:
         self.include_misc_faults = include_misc_faults
         self.include_controller_faults = include_controller_faults
         self.fast_load = fast_load
+        self.cv_thresh = cv_thresh
 
         self._features: list[str] = []
         self._samples = []
@@ -85,6 +88,21 @@ class Dataset:
 
             self._process_ts(time_series)
             del time_series
+        keep_feat_fn = root_path / 'good_features.txt'
+        if self.train:
+            if keep_feat_fn.is_file():
+                keep = np.loadtxt(keep_feat_fn, dtype=int, delimiter=',')
+            else:
+                samples = np.concatenate(self._samples, axis=0)
+                means = samples.mean(axis=0).abs()
+                stds = samples.std(axis=0)
+                cv = stds / means
+                keep = cv >= self.cv_thresh
+                np.savetxt(keep_feat_fn, keep, fmt='%d', delimiter=',')
+            self._samples = [s[:, keep] for s in self._samples]
+        else:
+            keep = np.loadtxt(keep_feat_fn, dtype=int, delimiter=',')
+            self._samples = [s[:, keep] for s in self._samples]
 
     def __getitem__(self, item) -> tuple[np.ndarray, np.ndarray]:
         return self._samples[item], self._targets[item]
