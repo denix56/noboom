@@ -26,3 +26,7 @@ class TorchDataset(Dataset, torch.utils.data.Dataset):
 
     def __getitem__(self, item: int) -> tuple[tuple[torch.Tensor], tuple[torch.Tensor]]:
         return (torch.as_tensor(self._samples[item]),), (torch.as_tensor(self._targets[item]),)
+
+    @property
+    def samples(self):
+        return self._samples
