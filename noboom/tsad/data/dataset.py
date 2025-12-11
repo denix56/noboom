@@ -94,7 +94,7 @@ class Dataset:
                 keep = np.loadtxt(keep_feat_fn, dtype=int, delimiter=',')
             else:
                 samples = np.concatenate(self._samples, axis=0)
-                means = samples.mean(axis=0).abs()
+                means = np.abs(samples.mean(axis=0))
                 stds = samples.std(axis=0)
                 cv = stds / (means + 1e-5)
                 keep = cv >= self.cv_thresh
