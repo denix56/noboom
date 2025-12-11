@@ -96,7 +96,7 @@ class Dataset:
                 samples = np.concatenate(self._samples, axis=0)
                 means = samples.mean(axis=0).abs()
                 stds = samples.std(axis=0)
-                cv = stds / means
+                cv = stds / (means + 1e-5)
                 keep = cv >= self.cv_thresh
                 np.savetxt(keep_feat_fn, keep, fmt='%d', delimiter=',')
             self._samples = [s[:, keep] for s in self._samples]
