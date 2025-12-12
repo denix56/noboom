@@ -88,21 +88,21 @@ class Dataset:
 
             self._process_ts(time_series)
             del time_series
-        keep_feat_fn = root_path / 'good_features.txt'
-        if self.train:
-            if keep_feat_fn.is_file():
-                keep = np.loadtxt(keep_feat_fn, dtype=int, delimiter=',')
-            else:
-                samples = np.concatenate(self._samples, axis=0)
-                means = np.abs(samples.mean(axis=0))
-                stds = samples.std(axis=0)
-                cv = stds / (means + 1e-5)
-                keep = cv >= self.cv_thresh
-                np.savetxt(keep_feat_fn, keep, fmt='%d', delimiter=',')
-            self._samples = [s[:, keep] for s in self._samples]
-        else:
-            keep = np.loadtxt(keep_feat_fn, dtype=int, delimiter=',')
-            self._samples = [s[:, keep] for s in self._samples]
+        # keep_feat_fn = root_path / 'good_features.txt'
+        # if self.train:
+        #     if keep_feat_fn.is_file():
+        #         keep = np.loadtxt(keep_feat_fn, dtype=int, delimiter=',')
+        #     else:
+        #         samples = np.concatenate(self._samples, axis=0)
+        #         means = np.abs(samples.mean(axis=0))
+        #         stds = samples.std(axis=0)
+        #         cv = stds / (means + 1e-5)
+        #         keep = cv >= self.cv_thresh
+        #         np.savetxt(keep_feat_fn, keep, fmt='%d', delimiter=',')
+        #     self._samples = [s[:, keep] for s in self._samples]
+        # else:
+        #     keep = np.loadtxt(keep_feat_fn, dtype=int, delimiter=',')
+        #     self._samples = [s[:, keep] for s in self._samples]
 
     def __getitem__(self, item) -> tuple[np.ndarray, np.ndarray]:
         return self._samples[item], self._targets[item]
