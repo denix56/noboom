@@ -60,6 +60,7 @@ class Dataset:
         time_series = time_series.astype(np.float32)
 
         self._samples.append(time_series.to_numpy())
+        print(self._samples[-1].shape)
         self._targets.append(targets)
 
     def load(self):
@@ -75,6 +76,8 @@ class Dataset:
         dataset_files = sorted(
             path for path in root_path.rglob('*.csv') if prefix in path.name
         )
+
+        print(len(dataset_files))
 
         for csv_path in dataset_files:
             parquet_path = csv_path.with_suffix('.parquet')
