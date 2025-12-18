@@ -1,10 +1,10 @@
 import numpy.typing as npt
 import numpy as np
 
-from noboom.tsad.metrics import compute_events
+from .utils import _edl
 
 
-def ldf(predictions: npt.NDArray[int], targets: npt.NDArray[int]) -> float:
+def ldf(predictions: npt.NDArray[np.integer], targets: npt.NDArray[np.integer]) -> float:
     """Compute the late detection frequency.
 
     An anomaly is a maximal continuous segment of targets, where targets is not zero.
@@ -23,17 +23,4 @@ def ldf(predictions: npt.NDArray[int], targets: npt.NDArray[int]) -> float:
     :param targets: A sequence of ground-truth labels with elements in [0,1,2,3].
     :return: Late Detection Frequency
     """
-
-    # Collect all anomaly events in the ground truth
-    anomalies = compute_events(targets)
-
-    # Filter out detected anomalies
-    anomalies = [anomaly for anomaly in anomalies if np.sum(predictions[anomaly[0]:anomaly[-1]]) > 0]
-
-    # Compute which anomalies are detected late
-    late_detected = [int(np.sum(predictions[anomaly[0]: anomaly[1]]) == 0) for anomaly in anomalies]
-
-    if late_detected:
-        return float(np.mean(late_detected))
-    else:
-        return 0.0
+    return _edl(predictions, targets, mode="early")
