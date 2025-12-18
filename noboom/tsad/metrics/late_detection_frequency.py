@@ -23,4 +23,4 @@ def ldf(predictions: npt.NDArray[np.integer], targets: npt.NDArray[np.integer]) 
     :param targets: A sequence of ground-truth labels with elements in [0,1,2,3].
     :return: Late Detection Frequency
     """
-    return _edl(predictions, targets, mode="early")
+    return _edl(predictions, targets, mode="late")
