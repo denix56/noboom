@@ -35,3 +35,7 @@ Repository = "https://github.com/denix56/noboom"
 
 [tool.hatch.build.targets.wheel]
 packages = ["noboom"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
