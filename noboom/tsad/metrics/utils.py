@@ -12,14 +12,13 @@ def continuous_segments(array: np.ndarray, value: int) -> np.ndarray:
     if eq.size == 0:
         return np.empty((0, 2), dtype=np.int64)
 
-    start = eq.copy()
-    start[1:] &= ~eq[:-1]
-    starts = np.flatnonzero(start)
+    w = eq.copy()
+    w[1:] &= ~eq[:-1]
+    starts = np.flatnonzero(w)
 
-    end = np.empty_like(eq)
-    end[:-1] = eq[:-1] & ~eq[1:]
-    end[-1] = eq[-1]
-    ends = np.flatnonzero(end) + 1
+    w[:-1] = eq[:-1] & ~eq[1:]
+    w[-1] = eq[-1]
+    ends = np.flatnonzero(w) + 1
 
     out = np.empty((starts.size, 2), dtype=np.int64)
     out[:, 0] = starts
