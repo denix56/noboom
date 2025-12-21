@@ -128,10 +128,18 @@ def _edl(predictions: np.ndarray, targets: np.ndarray, mode: Literal["early", "l
     ev = ev[detected]
     s = ev[:, 0]
     t1 = ev[:, 1]
+    t2 = ev[:, 2]
 
-    early = (p[t1] - p[s]) != 0
+    first_detection = np.empty(ev.shape[0], dtype=np.int64)
+    for i, (s_i, _, _, e_i) in enumerate(ev):
+        segment = preds_b[s_i:e_i]
+        # `detected` guarantees at least one True in the segment
+        first_detection[i] = s_i + int(segment.argmax())
+
     if mode == "early":
+        early = first_detection < t1
         return float(np.mean(early))
-    else:
-        # late = detected but not early (matches your LDF)
-        return float(np.mean(~early))
+
+    # Late detection requires the first prediction to fall into the targets == 3 region.
+    late = first_detection >= t2
+    return float(np.mean(late))
