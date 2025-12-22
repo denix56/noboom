@@ -1,6 +1,6 @@
 [build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+requires = ["uv-build>=0.7"]
+build-backend = "uv_build"
 
 [project]
 name = "noboom"
@@ -32,9 +32,6 @@ classifiers = [
 [project.urls]
 Homepage = "https://github.com/denix56/noboom"
 Repository = "https://github.com/denix56/noboom"
-
-[tool.hatch.build.targets.wheel]
-packages = ["noboom"]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
