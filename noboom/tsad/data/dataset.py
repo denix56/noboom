@@ -71,7 +71,7 @@ class Dataset:
         else:
             prefix = 'test'
 
-        root_path = Path(self.root)
+        root_path = Path(self.root) / self.name
         dataset_files = sorted(
             path for path in root_path.rglob('*.csv') if prefix in path.name
         )
