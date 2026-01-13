@@ -16,9 +16,15 @@ authors = [
 
 # Add your runtime dependencies here, or leave empty if none
 dependencies = [
-    "numpy<2.4.0",
+    "numpy<2.4.0"
+]
+
+[project.optional-dependencies]
+data = [
     "pandas>=2.3",
     "pyarrow>=20.0",
+]
+baselines=[
     "torch>=2.3"
 ]
 
