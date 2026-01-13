@@ -75,14 +75,19 @@ class Dataset:
         dataset_files = sorted(
             path for path in root_path.rglob('*.csv') if prefix in path.name
         )
+        if dataset_files:
+            load_func = lambda path: pd.read_csv(path)
+        else:
+            dataset_files = sorted(path for path in root_path.rglob("*.npy") if prefix in path.name)
+            load_func = lambda path: np.load(path)
 
-        for csv_path in dataset_files:
-            parquet_path = csv_path.with_suffix('.parquet')
+        for file_path in dataset_files:
+            parquet_path = file_path.with_suffix('.parquet')
 
             try:
                 time_series = pd.read_parquet(parquet_path)
             except FileNotFoundError:
-                time_series = pd.read_csv(csv_path)
+                time_series = load_func(file_path)
                 if self.fast_load:
                     time_series.to_parquet(parquet_path)
 
