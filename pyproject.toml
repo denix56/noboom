@@ -19,6 +19,13 @@ dependencies = [
     "numpy<2.4.0"
 ]
 
+# Optional classifiers (can delete if you do not care)
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+]
+
 [project.optional-dependencies]
 data = [
     "pandas>=2.3",
@@ -26,13 +33,6 @@ data = [
 ]
 baselines=[
     "torch>=2.3"
-]
-
-# Optional classifiers (can delete if you do not care)
-classifiers = [
-  "Programming Language :: Python :: 3",
-  "License :: OSI Approved :: MIT License",
-  "Operating System :: OS Independent",
 ]
 
 [project.urls]
