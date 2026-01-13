@@ -1,5 +1,11 @@
 from . import metrics
-from . import data
+
+try:
+    import pandas
+except ImportError:
+    pass
+else:
+    from . import data
 
 try:
     import torch
