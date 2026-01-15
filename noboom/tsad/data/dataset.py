@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Tuple
 import numpy as np
 import pandas as pd
 import os
@@ -62,6 +63,18 @@ class Dataset:
         self._samples.append(time_series.to_numpy())
         self._targets.append(targets)
 
+    def _process_ts_npy(self, time_series: Tuple[np.ndarray, np.ndarray]):
+        time_series, targets = time_series
+        if self.binary_labels:
+            if self.binary_labels:
+                targets = (targets > 0).astype(int)
+            else:
+                targets = targets.astype(int)
+            time_series = time_series.astype(np.float32)
+
+            self._samples.append(time_series)
+            self._targets.append(targets)
+
     def load(self):
         if self.train:
             if self.train_anomalies:
@@ -76,38 +89,40 @@ class Dataset:
             path for path in root_path.rglob('*.csv') if prefix in path.name
         )
         if dataset_files:
-            load_func = lambda path: pd.read_csv(path)
+            mode = 'PANDAS'
+            def load_func_(path):
+                parquet_path = path.with_suffix('.parquet')
+                try:
+                    time_series = pd.read_parquet(parquet_path)
+                except FileNotFoundError:
+                    time_series = pd.read_csv(file_path)
+                    if self.fast_load:
+                        time_series.to_parquet(parquet_path)
+                return time_series
+            load_func = load_func_
         else:
-            dataset_files = sorted(path for path in root_path.rglob("*.npy") if prefix in path.name)
-            load_func = lambda path: np.load(path)
+            mode = 'NPY'
+            dataset_files = sorted(path for path in root_path.rglob("*.npy") if prefix in path.name and 'labels' not in path.name)
+            def load_func_(path):
+                data = np.load(path)
+                if not self.train:
+                    path = Path(path)
+                    targets_path = path.with_name(path.stem + '_labels.npy')
+                    targets = np.load(targets_path)
+                else:
+                    targets = np.zeros(data.shape[0], dtype=np.int32)
+                return data, targets
+            load_func = load_func_
 
         for file_path in dataset_files:
-            parquet_path = file_path.with_suffix('.parquet')
-
-            try:
-                time_series = pd.read_parquet(parquet_path)
-            except FileNotFoundError:
-                time_series = load_func(file_path)
-                if self.fast_load:
-                    time_series.to_parquet(parquet_path)
-
-            self._process_ts(time_series)
+            time_series = load_func(file_path)
+            if mode == 'PANDAS':
+                self._process_ts(time_series)
+            elif mode == 'NPY':
+                self._process_ts_npy(time_series)
+            else:
+                raise ValueError(f'Unknown mode: {mode}')
             del time_series
-        # keep_feat_fn = root_path / 'good_features.txt'
-        # if self.train:
-        #     if keep_feat_fn.is_file():
-        #         keep = np.loadtxt(keep_feat_fn, dtype=int, delimiter=',')
-        #     else:
-        #         samples = np.concatenate(self._samples, axis=0)
-        #         means = np.abs(samples.mean(axis=0))
-        #         stds = samples.std(axis=0)
-        #         cv = stds / (means + 1e-5)
-        #         keep = cv >= self.cv_thresh
-        #         np.savetxt(keep_feat_fn, keep, fmt='%d', delimiter=',')
-        #     self._samples = [s[:, keep] for s in self._samples]
-        # else:
-        #     keep = np.loadtxt(keep_feat_fn, dtype=int, delimiter=',')
-        #     self._samples = [s[:, keep] for s in self._samples]
 
     def __getitem__(self, item) -> tuple[np.ndarray, np.ndarray]:
         return self._samples[item], self._targets[item]
