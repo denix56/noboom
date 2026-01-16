@@ -66,14 +66,13 @@ class Dataset:
     def _process_ts_npy(self, time_series: Tuple[np.ndarray, np.ndarray]):
         time_series, targets = time_series
         if self.binary_labels:
-            if self.binary_labels:
-                targets = (targets > 0).astype(int)
-            else:
-                targets = targets.astype(int)
-            time_series = time_series.astype(np.float32)
+            targets = (targets > 0).astype(int)
+        else:
+            targets = targets.astype(int)
+        time_series = time_series.astype(np.float32)
 
-            self._samples.append(time_series)
-            self._targets.append(targets)
+        self._samples.append(time_series)
+        self._targets.append(targets)
 
     def load(self):
         if self.train:
