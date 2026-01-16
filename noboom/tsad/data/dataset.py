@@ -102,6 +102,11 @@ class Dataset:
             load_func = load_func_
         else:
             mode = 'NPY'
+            if self.train:
+                prefix = 'train'
+            else:
+                prefix = 'test'
+
             dataset_files = sorted(path for path in root_path.rglob("*.npy") if prefix in path.name and 'labels' not in path.name)
             def load_func_(path):
                 data = np.load(path)
