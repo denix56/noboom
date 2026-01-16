@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Tuple
+from typing import Tuple, Optional
 import numpy as np
 import pandas as pd
 import os
@@ -145,6 +145,13 @@ class Dataset:
     @property
     def ndim(self) -> int:
         return self._samples[0].ndim
+
+    @property
+    def window_size(self) -> Optional[int]:
+        if self.ndim == 3:
+            return self._samples[0].shape[1]
+        else:
+            return None
 
     @property
     def label_feature(self):
