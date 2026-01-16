@@ -143,6 +143,10 @@ class Dataset:
         return self._samples[0].shape[-1]
 
     @property
+    def ndim(self) -> int:
+        return self._samples[0].ndim
+
+    @property
     def label_feature(self):
         return 'Anomaly' if self.name == 'industry_process' else 'Label (advanced/hard fault)'
 
