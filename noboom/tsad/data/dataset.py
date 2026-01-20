@@ -129,6 +129,7 @@ class Dataset:
             del time_series
 
     def __getitem__(self, item) -> tuple[np.ndarray, np.ndarray]:
+        print("NOBOOM:", self._targets[item].shape)
         return self._samples[item], self._targets[item]
 
     def __len__(self) -> int:
