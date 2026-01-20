@@ -25,6 +25,7 @@ class TorchDataset(Dataset, torch.utils.data.Dataset):
         torch.utils.data.Dataset.__init__(self)
 
     def __getitem__(self, item: int) -> tuple[tuple[torch.Tensor], tuple[torch.Tensor]]:
+        print("NOBOOM:", self._targets[item].shape)
         return (torch.as_tensor(self._samples[item]),), (torch.as_tensor(self._targets[item]),)
 
     @property
