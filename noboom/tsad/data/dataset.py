@@ -70,9 +70,12 @@ class Dataset:
         else:
             targets = targets.astype(int)
         time_series = time_series.astype(np.float32)
-
-        self._samples.append(time_series)
-        self._targets.append(targets)
+        if time_series.ndim == 3:
+            self._samples.extend(time_series)
+            self._targets.extend(targets)
+        else:
+            self._samples.append(time_series)
+            self._targets.append(targets)
 
     def load(self):
         if self.train:
