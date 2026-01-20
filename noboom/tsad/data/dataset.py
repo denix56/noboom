@@ -114,7 +114,7 @@ class Dataset:
                     targets_path = path.with_name(path.stem + '_labels.npy')
                     targets = np.load(targets_path)
                 else:
-                    targets = np.zeros(data.shape[0], dtype=np.int32)
+                    targets = np.zeros(data.shape[:-1], dtype=np.int32)
                 return data, targets
             load_func = load_func_
 
