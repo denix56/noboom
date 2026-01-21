@@ -53,9 +53,9 @@ class Dataset:
             time_series.loc[mask, self.label_feature] = time_series.loc[mask, self.label_controller_feature]
 
         if self.binary_labels:
-            targets = (time_series[self.label_feature].to_numpy() > 0).astype(int)
+            targets = (time_series[self.label_feature].to_numpy() > 0).astype(np.int32)
         else:
-            targets = time_series[self.label_feature].to_numpy().astype(int)
+            targets = time_series[self.label_feature].to_numpy().astype(np.int32)
 
         time_series.drop(self.meta_data, axis=1, inplace=True)
 
@@ -67,9 +67,9 @@ class Dataset:
     def _process_ts_npy(self, time_series: Tuple[np.ndarray, np.ndarray]):
         time_series, targets = time_series
         if self.binary_labels:
-            targets = (targets > 0).astype(int)
+            targets = (targets > 0).astype(np.int32)
         else:
-            targets = targets.astype(int)
+            targets = targets.astype(np.int32)
         time_series = time_series.astype(np.float32)
         if time_series.ndim == 3:
             self._samples.extend(time_series)
