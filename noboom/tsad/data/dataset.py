@@ -41,6 +41,7 @@ class Dataset:
         self._targets = []
 
         self.load()
+        self._seq_len = [ts.shape[0] for ts in self._samples]
 
     def _process_ts(self, time_series: pd.DataFrame):
         if self.include_misc_faults and self.label_misc_feature is not None:
@@ -139,7 +140,7 @@ class Dataset:
 
     @property
     def seq_len(self) -> list[int]:
-        return [ts.data.shape[0] for ts in self._samples]
+        return self._seq_len
 
     @property
     def num_features(self) -> int:
